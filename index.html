@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRAP ADVENTURE</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- ════ MAIN MENU ════ -->
+<div id="menu">
+  <!-- Đặt file video vào cùng thư mục, đổi tên src nếu cần -->
+  <video id="menu-video" autoplay muted loop playsinline>
+    <source src="menu-bg.mp4" type="video/mp4" />
+  </video>
+  <!-- Fallback nếu không có video -->
+  <div id="menu-bg-fallback" style="display:none;"></div>
+  <div id="menu-overlay"></div>
+  <div id="menu-grid"></div>
+  <div id="menu-glow"></div>
+
+  <div class="menu-content">
+    <div class="menu-logo">
+      <div class="title-main" data-text="TRAP ADVENTURE">TRAP<br>ADVENTURE</div>
+      <div class="title-sub">First Person Edition</div>
+      <div class="skull-row">💀 &nbsp; 💀 &nbsp; 💀</div>
+    </div>
+    <div class="menu-divider"><div class="menu-divider-icon">⚔</div></div>
+    <div class="menu-buttons">
+      <button class="btn btn-start" onclick="startGame()">▶ &nbsp; Bắt Đầu</button>
+      <button class="btn btn-intro" onclick="openIntro()">📖 &nbsp; Hướng Dẫn</button>
+    </div>
+  </div>
+</div>
+
+<div class="ver-tag">v0.1 ALPHA</div>
+
+<!-- ════ INTRO MODAL ════ -->
+<div id="modal-overlay">
+  <div class="modal">
+    <h2>☠ Hướng Dẫn ☠</h2>
+    <div class="controls-grid">
+      <div class="ctrl-row"><div class="key">W</div><div class="ctrl-desc">Đi tới</div></div>
+      <div class="ctrl-row"><div class="key">S</div><div class="ctrl-desc">Đi lui</div></div>
+      <div class="ctrl-row"><div class="key">A</div><div class="ctrl-desc">Sang trái</div></div>
+      <div class="ctrl-row"><div class="key">D</div><div class="ctrl-desc">Sang phải</div></div>
+      <div class="ctrl-row"><div class="key">SPACE</div><div class="ctrl-desc">Nhảy</div></div>
+      <div class="ctrl-row"><div class="key">SHIFT</div><div class="ctrl-desc">Chạy nhanh</div></div>
+      <div class="ctrl-row"><div class="key">F</div><div class="ctrl-desc">Mở rương</div></div>
+      <div class="ctrl-row"><div class="key">C</div><div class="ctrl-desc">Nhặt vật phẩm</div></div>
+      <div class="ctrl-row"><div class="key">CHUỘT</div><div class="ctrl-desc">Nhìn xung quanh</div></div>
+      <div class="ctrl-row"><div class="key">ESC</div><div class="ctrl-desc">Tạm dừng</div></div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-tip">
+      Đây là game <span>TRAP ADVENTURE</span> góc nhìn thứ nhất.
+      Tránh bẫy, vượt chướng ngại vật và nhận cổ vật để thoát khỏi màn.
+      Không có điểm. Không có orb. Chỉ có <span>SỰ SỐNG CÒN</span>.
+    </div>
+    <button class="btn-close" onclick="closeIntro()">✕ &nbsp; Đóng</button>
+  </div>
+</div>
+
+<!-- ════ GAME CANVAS ════ -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- ════ HUD ════ -->
+<div id="hud">
+  <div id="crosshair"></div>
+  <div id="pause-hint">ESC — Tạm dừng</div>
+</div>
+
+<!-- ════ CREDITS ════ -->
+<div id="credits-screen">
+  <div class="credits-wrap">
+    <div class="credits-roll">
+      <div class="credits-stars">✦ ✦ ✦</div>
+      <div class="credits-thanks">CẢM ƠN BỊ VÌ ĐÃ TRẢI NGHIỆM GAME CỦA CHÚNG TÔI</div>
+      <div class="credits-sub">Game đang trong giai đoạn phát triển</div>
+      <div class="credits-label">Thành viên nhóm</div>
+      <div class="credits-name">Nguyễn Huy Hoàng</div>
+      <div class="credits-name">Nguyễn Đức Huy</div>
+      <div class="credits-name">Đỗ Đăng Dương</div>
+      <div class="credits-name">Phạm Minh Nguyên</div>
+      <div class="credits-name">Đặng Thành Nam</div>
+      <div class="credits-name">Quách Trung Kiên</div>
+      <div class="credits-stars" style="margin-top:40px;">✦ ✦ ✦</div>
+    </div>
+  </div>
+  <button class="btn btn-intro credits-btn-menu" onclick="closeCredits()">⌂ &nbsp; Menu Chính</button>
+</div>
+
+<!-- ════ PAUSE MENU ════ -->
+<div id="pause-menu">
+  <div class="pause-title">⏸ Tạm Dừng</div>
+  <button class="btn btn-start" onclick="resumeGame()" style="width:220px;font-size:15px;letter-spacing:3px;">▶ Tiếp Tục</button>
+  <button class="btn btn-intro" onclick="backToMenu()" style="width:220px;font-size:15px;letter-spacing:3px;">⌂ Menu Chính</button>
+</div>
+
+<script type="module" src="main.js"></script>
+<script>
+  // Xử lý video background — fallback nếu không có file
+  const vid = document.getElementById('menu-video');
+  if (vid) {
+    vid.addEventListener('error', () => {
+      vid.style.display = 'none';
+      document.getElementById('menu-bg-fallback').style.display = 'block';
+    });
+    // Nếu sau 2s vẫn chưa load được thì dùng fallback
+    setTimeout(() => {
+      if (vid.readyState === 0) {
+        vid.style.display = 'none';
+        const fb = document.getElementById('menu-bg-fallback');
+        if (fb) fb.style.display = 'block';
+      }
+    }, 2000);
+  }
+</script>
+</body>
+</html>
