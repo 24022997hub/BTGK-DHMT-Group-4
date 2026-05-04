@@ -137,8 +137,9 @@ body {
 /* Logo / Title */
 .menu-logo {
   position: absolute;
-  top: 15%;           /* Vị trí cao thấp tùy bạn chỉnh */
+  top: 50%;           /* Vị trí cao thấp tùy bạn chỉnh */
   left: 50%;
+  margin-top: -242px;
   text-align: center;
   
   /* Gọi animation đã sửa ở trên */
@@ -265,7 +266,8 @@ body {
 /* .btn:active { transform: translateX(-50%) scale(0.97); } Giữ transform X khi nhấn */
 
 .btn-start {
-  top: 71.4%; /* CHỈNH VỊ TRÍ LÊN/XUỐNG TẠI ĐÂY */
+  top: 50%;
+  margin-top: 148px;
   width: 339px;
   background: linear-gradient(135deg, #cc2020, #aa1818);
   color: #fff;
@@ -286,7 +288,8 @@ body {
 }
 
 .btn-intro {
-  top: 83%;
+  top: 50%;
+  margin-top: 228px;
   width: 339px;
   background: rgba(20,16,40,0.9);
   color: rgba(160,150,220,0.9);

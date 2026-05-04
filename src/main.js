@@ -1,7 +1,7 @@
 import { keys, initInput, consumeMouseDelta } from './managers/InputManager.js';
 import { playerVY, isOnGround, updatePlayer, resetPlayer } from './entities/Player.js';
 import { SPEED, RUN_SPEED, JUMP_FORCE, GRAVITY, PLAYER_H, PLAYER_RADIUS, DEATH_Y, SPAWN_X, SPAWN_Y, SPAWN_Z, FLAME_Y_OFFSET, TORCH_SHOW_DIST, TORCH_LIGHT_DIST, MAX_ACTIVE_LIGHTS, MOVING_TRAP_TRIGGER_Z, MOVING_TRAP_SPEED, MOVING_TRAP_TRAVEL, TRAP5_SPEED, TRAP5_TRAVEL, CHEST_INTERACT_DIST, CHEST_KNOCKBACK_SPEED, LOOT_PICKUP_DIST, PORTAL_TELEPORT_DIST, WALL_RISE_AMOUNT, WALL_RISE_SPEED, WALL_CONFIGS, SPIDER_TRIGGER_DIST, SPIDER_FLY_SPEED, SPIDER_STOP_X, SPIDER_RETURN_TRIG_X, SPIDER_FLY_ROT, SPIDER_HIT_ROT, SPIDER_BACK_ROT, TRIGGER_X_MIN, TRIGGER_X_MAX, TRIGGER_Z_MIN, TRIGGER_Z_MAX, TRIGGER_Y_MAX, PLATFORM_HINT_OFFSET, PLATFORM_SHIFT_1, PLATFORM_SHIFT_2, PLATFORM_SHIFT_3, PLATFORM_SPEED, CUA2_ROT_SPEED, CUA2_TRIGGER_DIST, CUA2_RISE_DIST, CUA_RESET_DIST, CUA2_RISE_SPEED, CUA7_FALL_DIST, CUA7_FALL_SPEED, CUA7_WARN_DIST, PORTAL_DEST, } from './utils/constants.js';
-import { preloadAudio, playSFX, playBGM, stopBGM, updateFootstep, _initAudioCtx } from './managers/AudioManager.js';
+import { preloadAudio, playSFX, playBGM, stopBGM, updateFootstep, _initAudioCtx, stopAllSFX } from './managers/AudioManager.js';
 import { renderer, scene, camera, clock, composer, yawObject, pitchObject, initRenderer, setupLights } from './core/Renderer.js';
 import { rc, collisionMeshes, trapMeshes } from './physics/Collider.js';
 import { initTorch, updateTorches, resetTorches } from './entities/Torch.js';
@@ -1416,17 +1416,21 @@ function gameLoop(ts = 0) {
     return;
   }
 
-  // Apply mouse delta 1 lần mỗi frame — luôn apply dù delta = 0
+  // Lấy data chuột ra để xả bộ nhớ đệm (tránh giật camera khi hồi sinh)
   const mDelta = consumeMouseDelta();
-  yaw -= mDelta.x * 0.002;
-  pitch -= mDelta.y * 0.002;
-  pitch  = Math.max(-1.2, Math.min(1.2, pitch));
-  yawObject.rotation.y   = yaw;
-  pitchObject.rotation.x = pitch;
 
-  const pState = updatePlayer(dt, keys, devMode, yaw, wasOnPlatform, wasJumping, mapLoaded, triggerDeath);
-  wasOnPlatform = pState.wasOnPlatform;
-  wasJumping = pState.wasJumping;
+  // CHỈ CHO PHÉP XOAY VÀ DI CHUYỂN KHI CHƯA CHẾT
+  if (!isDead) {
+    yaw -= mDelta.x * 0.002;
+    pitch -= mDelta.y * 0.002;
+    pitch  = Math.max(-1.2, Math.min(1.2, pitch));
+    yawObject.rotation.y   = yaw;
+    pitchObject.rotation.x = pitch;
+
+    const pState = updatePlayer(dt, keys, devMode, yaw, wasOnPlatform, wasJumping, mapLoaded, triggerDeath);
+    wasOnPlatform = pState.wasOnPlatform;
+    wasJumping = pState.wasJumping;
+  }
 
   checkTraps()
   updateTorches(dt);         // đuốc — CHUNG
@@ -1563,7 +1567,7 @@ function loadMap(map) {
 // main.js
 
 function handleKeyDown(e) {
-  if (!gameRunning) return;
+  if (!gameRunning || isDead) return;
 
   // ESC: Tạm dừng
   if (e.code === 'Escape') togglePause();
@@ -1670,6 +1674,7 @@ function backToMenu() {
   document.getElementById('menu').style.display       = 'flex';
   document.getElementById('particles').style.display  = 'block';
   document.exitPointerLock();
+  stopAllSFX();
   if (currentMap) { currentMap.reset(); currentMap = null; }
   respawn();
   playBGM('bgMenu', 0.4);

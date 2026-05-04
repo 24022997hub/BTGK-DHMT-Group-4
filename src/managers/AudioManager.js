@@ -64,6 +64,9 @@ export function preloadAudio() {
   });
 }
 
+// --- THÊM DÒNG NÀY ĐỂ LƯU TRỮ CÁC ÂM THANH ĐANG PHÁT ---
+const _activeSFX = [];
+
 export function playSFX(key, volume = 1.0, speed = 1.0, loop = false) { 
   _initAudioCtx();
   if (_audioCtx.state === 'suspended') _audioCtx.resume();
@@ -76,7 +79,7 @@ export function playSFX(key, volume = 1.0, speed = 1.0, loop = false) {
     a.loop = loop;
     a.play().catch(() => {});
     
-    return { 
+    const sfxObj = { 
       pause: () => { 
         let v = a.volume;
         const fade = setInterval(() => {
@@ -88,6 +91,8 @@ export function playSFX(key, volume = 1.0, speed = 1.0, loop = false) {
       setVolume: (v) => { a.volume = Math.max(0, Math.min(1, v)); },
       currentTime: 0 
     };
+    _activeSFX.push(sfxObj); // Lưu lại để sau này tắt
+    return sfxObj;
   }
 
   const source = _audioCtx.createBufferSource();
@@ -102,7 +107,7 @@ export function playSFX(key, volume = 1.0, speed = 1.0, loop = false) {
   gainNode.connect(_audioCtx.destination);
   source.start(0); 
 
-  return {
+  const sfxObj = {
     pause: () => { 
       try { 
         gainNode.gain.setTargetAtTime(0, _audioCtx.currentTime, 0.015);
@@ -112,6 +117,15 @@ export function playSFX(key, volume = 1.0, speed = 1.0, loop = false) {
     setVolume: (v) => { gainNode.gain.value = Math.max(0, Math.min(1, v)); },
     currentTime: 0
   };
+  
+  _activeSFX.push(sfxObj); // Lưu lại để sau này tắt
+  return sfxObj;
+}
+
+// --- THÊM HÀM NÀY XUỐNG CUỐI CÙNG CỦA FILE AudioManager.js ---
+export function stopAllSFX() {
+  _activeSFX.forEach(sfx => sfx.pause());
+  _activeSFX.length = 0; // Dọn sạch bộ nhớ
 }
 
 let _currentBG = null;
