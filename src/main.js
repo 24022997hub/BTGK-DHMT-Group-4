@@ -2964,7 +2964,7 @@ let currentMap = null;
 
 // ── MAP 1 ──
 const MAP_1 = {
-  glbPath: './map1.glb',
+  glbPath: '/model/map1.glb',
 
   init() {
     loadBlenderMap(this.glbPath);
@@ -3505,7 +3505,7 @@ function fullResetMap2Cua2() {
 }
 
 const MAP_2 = {
-  glbPath: './map2.glb',
+  glbPath: '/model/map2.glb',
 
   init() {
     loadBlenderMap(this.glbPath);

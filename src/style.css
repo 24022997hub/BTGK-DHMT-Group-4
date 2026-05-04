@@ -57,6 +57,7 @@ body {
   pointer-events: none;
 }
 
+
 /* Fallback nếu không có video */
 #menu-bg-fallback {
   position: absolute;
@@ -69,8 +70,19 @@ body {
     #080610;
 }
 
+#menu-bg-image {
+  position: absolute;
+  inset: 0;           /* Phủ kín 4 góc */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;  /* Ép ảnh tràn màn hình mà không bị méo */
+  z-index: 0;
+  opacity: 1;         /* Độ đậm nhạt (1 là rõ nhất) */
+  filter: brightness(1); /* Sửa thành 1 để ảnh sáng bình thường, hoặc 1.2 để sáng hơn */
+}
+
 /* Overlay tối lên trên video */
-#menu-overlay {
+/* #menu-overlay {
   position: absolute;
   inset: 0;
   background:
@@ -79,7 +91,7 @@ body {
     radial-gradient(ellipse 50% 50% at 80% 20%, rgba(32,0,16,0.7) 0%, transparent 60%),
     rgba(6,6,16,0.7);
   z-index: 1;
-}
+} */
 
 /* Lưới nền */
 #menu-grid {
@@ -115,23 +127,36 @@ body {
 
 /* Container nội dung */
 .menu-content {
-  position: relative;
+  position: relative; /* Cần thiết để các nút căn theo khung này */
   z-index: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  display: block;     /* Tắt flexbox để không bị đẩy nhau */
 }
 
 /* Logo / Title */
 .menu-logo {
+  position: absolute;
+  top: 15%;           /* Vị trí cao thấp tùy bạn chỉnh */
+  left: 50%;
   text-align: center;
-  margin-bottom: 12px;
+  
+  /* Gọi animation đã sửa ở trên */
   animation: floatTitle 4s ease-in-out infinite;
+  
+  margin-bottom: 0;   /* Xóa margin để không bị lệch */
+  z-index: 6;         /* Đảm bảo nằm trên các lớp khác */
 }
 
 @keyframes floatTitle {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-8px); }
+  0%, 100% { 
+    /* Giữ nguyên căn giữa X và bắt đầu ở Y = 0 */
+    transform: translateX(-50%) translateY(5px); 
+  }
+  50% { 
+    /* Giữ nguyên căn giữa X và bay lên ở Y = -15px (Hoặc số bạn thích) */
+    transform: translateX(-50%) translateY(-5px); 
+  }
 }
 
 .title-main {
@@ -207,7 +232,13 @@ body {
 }
 
 .btn {
-  width: 100%;
+  /* Vị trí độc lập */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* Luôn giữ nút ở giữa màn hình */
+  
+  /* Style nguyên bản của bạn */
+  width: 280px;
   padding: 14px 0;
   font-family: var(--font-viet);
   font-size: 15px;
@@ -218,10 +249,10 @@ body {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;
   overflow: hidden;
 }
 
+/* Hiệu ứng sáng loáng khi hover của bạn */
 .btn::before {
   content: '';
   position: absolute;
@@ -230,10 +261,12 @@ body {
   opacity: 0;
   transition: opacity 0.2s;
 }
-.btn:hover::before  { opacity: 1; }
-.btn:active { transform: scale(0.97) translateY(1px); }
+.btn:hover::before { opacity: 1; }
+/* .btn:active { transform: translateX(-50%) scale(0.97); } Giữ transform X khi nhấn */
 
 .btn-start {
+  top: 71.4%; /* CHỈNH VỊ TRÍ LÊN/XUỐNG TẠI ĐÂY */
+  width: 339px;
   background: linear-gradient(135deg, #cc2020, #aa1818);
   color: #fff;
   border: 1px solid rgba(255,100,100,0.3);
@@ -249,10 +282,12 @@ body {
     0 4px 0 #880000,
     0 6px 30px rgba(255,0,0,0.5),
     inset 0 1px 0 rgba(255,255,255,0.15);
-  transform: translateY(-1px);
+  /* transform: translateY(-1px); */
 }
 
 .btn-intro {
+  top: 83%;
+  width: 339px;
   background: rgba(20,16,40,0.9);
   color: rgba(160,150,220,0.9);
   border: 1px solid rgba(100,80,180,0.35);
@@ -265,7 +300,7 @@ body {
   background: rgba(30,22,55,0.95);
   color: rgba(200,190,255,1);
   border-color: rgba(140,120,220,0.6);
-  transform: translateY(-1px);
+  /* transform: translateY(-1px); */
 }
 
 /* Ver tag */
@@ -461,15 +496,41 @@ body {
 }
 #pause-menu.open { display: flex; }
 
+/* --- Tiêu đề "TẠM DỪNG" --- */
 .pause-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Căn giữa cả 2 trục */
+  
+  margin-top: -100px;  /* Đẩy ngược lên trên tâm 100px */
+  margin-bottom: 0;    /* Xóa margin cũ để không bị lệch xuống */
+  
+  /* Giữ nguyên style chữ của Hoàng */
   font-family: var(--font-deco);
   font-size: 32px;
-  font-weight: 900;
-  color: #ff5555;
   letter-spacing: 8px;
+  color: #ff5555;
   text-transform: uppercase;
-  margin-bottom: 24px;
-  text-shadow: 0 0 30px rgba(255,60,60,0.5);
+}
+
+/* --- Căn chỉnh chung các nút trong Pause Menu --- */
+#pause-menu .btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;        /* Chiều ngang nút tùy Hoàng chỉnh */
+}
+
+/* Nút TIẾP TỤC (Nằm trên) */
+#pause-menu .btn:first-of-type {
+  margin-top: 35px;    /* Đẩy xuống dưới tâm 35px */
+}
+
+/* Nút MENU CHÍNH (Nằm dưới) */
+#pause-menu .btn:last-of-type {
+  margin-top: 95px;    /* Đẩy xuống dưới tâm 95px */
 }
 
 /* ══════════════════════════════════════
@@ -720,6 +781,7 @@ body {
 .credits-btn-menu {
   position: fixed;
   bottom: 40px;
+  height: 50px;
   width: 220px;
   font-size: 15px;
   letter-spacing: 3px;
